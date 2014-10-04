@@ -1,33 +1,45 @@
-"""
-Cluster analysis and simulation code for super-resolution microscopy.
+"""Cluster analysis and simulation code for super-resolution
+microscopy.
 
 This file contains a number of functions for simulating and analyzing
 clustered point localization data from super-resolution fluorescence
 microscopy experiments.
+
 """
 
 __author__ = 'Kyle M. Douglass'
 __email__ = 'kyle.m.douglass@gmail.com'
-__version__ = 0.1
+__version__ = 0.2
 
 import numpy as np
 
 class simExperiment():
-    """
-    Contains a given number of clusters of points. The cluster centers
-    are randomly distributed, as are the locations of the points within
-    each cluster.
-    """
+    """This is a simulation of a cluster analysis experiment. The
+    experiment contains a number of clusters of randomly distributed
+    points.
 
+    It is possible to compute the radius of gyration of each cluster
+    and to simulate the effects of a non-zero localization uncertainty
+    on determining the cluster's size.
+
+    """
+    
     def __init__(self, numClusters, ptsPerCluster, clusterWidth, distr):
-        """
-        Randomly distribute locations of all points.
+        """Randomly distribute locations of all points.
+
         """
         self.numClusters = numClusters
         self.ptsPerCluster = ptsPerCluster
         self.clusterWidth = clusterWidth
+        self.distr = distr.lower()
 
-        self.points = clusterWidth * np.random.randn(ptsPerCluster, 3, numClusters)
+        distrTypes = ['gaussian', 'uniform']
+        assert self.distr in distrTypes
+
+        if self.distr == 'gaussian':
+            self.points = clusterWidth * np.random.randn(ptsPerCluster, 3, numClusters)
+        elif self.distr == 'uniform':
+            self.points = 2 * clusterWidth * (np.random.rand(ptsPerCluster, 3, numClusters) - 1)
 
     def findRadGyr(self):
         centers = np.mean(self.points, axis = 0)
@@ -38,7 +50,12 @@ class simExperiment():
         return np.sqrt(Rg2)
 
 if __name__ == '__main__':
-    myExp = simExperiment(10, 100, 100, 'gaussian')
+    numClusters = 10
+    ptsPerCluster = 1000
+    clusterWidth = 200
+    distr = 'uniform'
+    
+    myExp = simExperiment(numClusters, ptsPerCluster, clusterWidth, distr)
     Rg = myExp.findRadGyr()
     print(Rg)
 
