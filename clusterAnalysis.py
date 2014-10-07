@@ -9,7 +9,7 @@ microscopy experiments.
 
 __author__ = 'Kyle M. Douglass'
 __email__ = 'kyle.m.douglass@gmail.com'
-__version__ = 0.4
+__version__ = 0.5
 
 import numpy as np
 
@@ -88,22 +88,54 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D
 
-    numClusters = 10
-    ptsPerCluster = 1000
-    clusterWidth = 200
+    numClusters = 1000
+    ptsPerCluster = 100
+    clusterWidth = 100
     distr = 'uniform'
-    bumpDist = (10, 10, 10)
-    
-    myExp = simExperiment(numClusters, ptsPerCluster, clusterWidth, distr)
-    Rg = myExp.findRadGyr(myExp.points)
-    bp = myExp.bumpPoints(bumpDist)
-    
-    fig = plt.figure(figsize=(8,8))
-    ax = fig.add_subplot(111, projection='3d')
+    bumpDist = (10, 10, 50)
 
-    ax.scatter(myExp.points[:,0,0], myExp.points[:,1,0], myExp.points[:,2,0], color = 'blue')
-    ax.scatter(bp[:,0,0], bp[:,1,0], bp[:,2,0], color = 'red')
-    plt.show()
+    # Test Rg error vs. Rg
+    clusterSize = np.arange(50, 200, 5)
+    RgErr = np.zeros(clusterSize.size)
+    for counter, radius in enumerate(clusterSize):
+        myExp = simExperiment(numClusters, ptsPerCluster, radius, distr)
+        Rg = myExp.findRadGyr(myExp.points)
+        bp = myExp.bumpPoints(bumpDist)
+        RgBump = myExp.findRadGyr(bp)
+        RgErr[counter] = (np.mean(RgBump) - np.mean(Rg)) / np.mean(Rg)
+
+    plt.plot(clusterSize, RgErr, 'o', linewidth = 2.0)
+    plt.xlabel('Cluster half-width, nm', fontsize = 16)
+    plt.ylabel(r'Relative error in $R_g$', fontsize = 16)
+    plt.grid(True)
+    plt.savefig('Error_vs_Rg.svg')
+    plt.close()
+
+    # Test Rg error vs. localization precision
+    # (Axial precision is fixed at 50 nm)
+    precTrans = np.arange(5, 30)
+    RgErr = np.zeros(precTrans.size)
+    for counter, precision in enumerate(precTrans):
+        myExp = simExperiment(numClusters, ptsPerCluster, clusterWidth, distr)
+        Rg = myExp.findRadGyr(myExp.points)
+        bp = myExp.bumpPoints((precision, precision, 50))
+        RgBump = myExp.findRadGyr(bp)
+        RgErr[counter] = (np.mean(RgBump) - np.mean(Rg)) / np.mean(Rg)
+
+    plt.plot(precTrans, RgErr, 'o', linewidth = 2.0)
+    plt.xlabel('Transverse localization precision, nm', fontsize = 16)
+    plt.ylabel(r'Relative error in $R_g$', fontsize = 16)
+    plt.grid(True)
+    plt.savefig('Prec_vs_Rg.svg')
+    plt.close()
+    
+
+#    fig = plt.figure(figsize=(8,8))
+#    ax = fig.add_subplot(111, projection='3d')
+
+#    ax.scatter(myExp.points[:,0,0], myExp.points[:,1,0], myExp.points[:,2,0], color = 'blue')
+#    ax.scatter(bp[:,0,0], bp[:,1,0], bp[:,2,0], color = 'red')
+#    plt.show()
 
 
 
