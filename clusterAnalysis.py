@@ -90,11 +90,11 @@ if __name__ == '__main__':
 
     numClusters = 1000
     ptsPerCluster = 100
-    clusterWidth = 100
     distr = 'uniform'
-    bumpDist = (10, 10, 50)
 
     # Test Rg error vs. Rg
+    # 10 nm transverse localization precision
+    bumpDist = (10, 10, 50)
     clusterSize = np.arange(50, 200, 5)
     RgErr = np.zeros(clusterSize.size)
     for counter, radius in enumerate(clusterSize):
@@ -104,31 +104,39 @@ if __name__ == '__main__':
         RgBump = myExp.findRadGyr(bp)
         RgErr[counter] = (np.mean(RgBump) - np.mean(Rg)) / np.mean(Rg)
 
-    plt.plot(clusterSize, RgErr, 'o', linewidth = 2.0)
-    plt.xlabel('Cluster half-width, nm', fontsize = 16)
-    plt.ylabel(r'Relative error in $R_g$', fontsize = 16)
-    plt.grid(True)
-    plt.savefig('Error_vs_Rg.svg')
-    plt.close()
+    prec10 = plt.plot(clusterSize, RgErr, 'o', linewidth = 2.0, label = '10 nm')
 
-    # Test Rg error vs. localization precision
-    # (Axial precision is fixed at 50 nm)
-    precTrans = np.arange(5, 30)
-    RgErr = np.zeros(precTrans.size)
-    for counter, precision in enumerate(precTrans):
-        myExp = simExperiment(numClusters, ptsPerCluster, clusterWidth, distr)
+    # 20 nm transverse localization precision
+    bumpDist = (20, 20, 50)
+    clusterSize = np.arange(50, 200, 5)
+    RgErr = np.zeros(clusterSize.size)
+    for counter, radius in enumerate(clusterSize):
+        myExp = simExperiment(numClusters, ptsPerCluster, radius, distr)
         Rg = myExp.findRadGyr(myExp.points)
-        bp = myExp.bumpPoints((precision, precision, 50))
+        bp = myExp.bumpPoints(bumpDist)
         RgBump = myExp.findRadGyr(bp)
         RgErr[counter] = (np.mean(RgBump) - np.mean(Rg)) / np.mean(Rg)
 
-    plt.plot(precTrans, RgErr, 'o', linewidth = 2.0)
-    plt.xlabel('Transverse localization precision, nm', fontsize = 16)
+    prec20 = plt.plot(clusterSize, RgErr, '^', linewidth = 2.0, label = '20 nm')
+
+    # 30 nm transverse localization precision
+    bumpDist = (30, 30, 50)
+    clusterSize = np.arange(50, 200, 5)
+    RgErr = np.zeros(clusterSize.size)
+    for counter, radius in enumerate(clusterSize):
+        myExp = simExperiment(numClusters, ptsPerCluster, radius, distr)
+        Rg = myExp.findRadGyr(myExp.points)
+        bp = myExp.bumpPoints(bumpDist)
+        RgBump = myExp.findRadGyr(bp)
+        RgErr[counter] = (np.mean(RgBump) - np.mean(Rg)) / np.mean(Rg)
+
+    prec30 = plt.plot(clusterSize, RgErr, 's', linewidth = 2.0, label = '30 nm')
+    plt.xlabel('Cluster half-width, nm', fontsize = 16)
     plt.ylabel(r'Relative error in $R_g$', fontsize = 16)
     plt.grid(True)
-    plt.savefig('Prec_vs_Rg.svg')
-    plt.close()
-    
+    plt.legend()
+    plt.savefig('Error_vs_Rg.svg')
+    plt.close()    
 
 #    fig = plt.figure(figsize=(8,8))
 #    ax = fig.add_subplot(111, projection='3d')
