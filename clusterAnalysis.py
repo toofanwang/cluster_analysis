@@ -9,7 +9,7 @@ microscopy experiments.
 
 __author__ = 'Kyle M. Douglass'
 __email__ = 'kyle.m.douglass@gmail.com'
-__version__ = 0.3
+__version__ = 0.4
 
 import numpy as np
 
@@ -41,12 +41,12 @@ class simExperiment():
         elif self.distr == 'uniform':
             self.points = 2 * clusterWidth * (np.random.rand(ptsPerCluster, 3, numClusters) - 0.5)
 
-    def findRadGyr(self):
+    def findRadGyr(self, points):
         """Finds the radius of gyration of each cluster.
 
         """
-        centers = np.mean(self.points, axis = 0)
-        deltaR = self.points - centers
+        centers = np.mean(points, axis = 0)
+        deltaR = points - centers
 
         Rg2 = np.sum(np.sum(deltaR**2, axis = 1), axis = 0) / self.ptsPerCluster
 
@@ -92,10 +92,11 @@ if __name__ == '__main__':
     ptsPerCluster = 1000
     clusterWidth = 200
     distr = 'uniform'
+    bumpDist = (10, 10, 10)
     
     myExp = simExperiment(numClusters, ptsPerCluster, clusterWidth, distr)
-    Rg = myExp.findRadGyr()
-    bp = myExp.bumpPoints((1,1,1))
+    Rg = myExp.findRadGyr(myExp.points)
+    bp = myExp.bumpPoints(bumpDist)
     
     fig = plt.figure(figsize=(8,8))
     ax = fig.add_subplot(111, projection='3d')
